@@ -23,7 +23,7 @@ def index():
 @app.route("/send/<room>", methods=["POST"])
 def commands(room):
     post_data = json.loads(request.data)
-    emit('my_response',
+    emit('command',
          post_data,
          room=room,
          namespace=command_namespace)
@@ -33,20 +33,19 @@ def commands(room):
 @socketio.on('my_room_event', namespace=command_namespace)
 def send_room_message(message):
     session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('my_response',
+    emit('command',
          {'data': message['data'], 'count': session['receive_count']},
          room=message['room'])
 
 
 @socketio.on('connect', namespace=command_namespace)
-def test_connect():
-    emit('my_response', {'data': 'Connected', 'count': 0})
+def connect():
+    emit('command', {'data': 'Connected', 'count': 0})
 
 
 @socketio.on('join', namespace=command_namespace)
 def join(message):
     join_room(message['room'])
-    session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('my_response',
+    emit('command',
          {'data': 'In rooms: ' + ', '.join(rooms()),
-          'count': session['receive_count']})
+          'count': 'test'})
