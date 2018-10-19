@@ -4,6 +4,9 @@ from threading import Lock
 from flask import Flask, render_template, session, request
 from flask_socketio import SocketIO, emit, join_room, rooms
 
+import eventlet
+eventlet.monkey_patch()
+
 async_mode = None
 
 app = Flask(__name__)
