@@ -1,0 +1,3 @@
+Flask
+Werkzeug<0.13.0,>
+flask-socketio
