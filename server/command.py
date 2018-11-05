@@ -1,30 +1,28 @@
 #!/usr/bin/env python
-import json
+import json, os
+from server import socketio
 from threading import Lock
-from flask import Flask, render_template, session, request
-from flask_socketio import SocketIO, emit, join_room, rooms
+from flask import Blueprint, session, request
+from flask_socketio import emit, join_room, rooms
 
 import eventlet
 eventlet.monkey_patch()
 
-async_mode = None
+commands = Blueprint('commands', __name__)
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
 
 command_namespace = '/commands'
 
 
-@app.route('/')
-def index():
-    return render_template('index.html', async_mode=socketio.async_mode)
+@commands.route("/")
+def test():
+    return 'api test'
 
 
-@app.route("/send/<room>", methods=["POST"])
-def commands(room):
+@commands.route("/send/<room>", methods=["POST"])
+def command(room):
     post_data = json.loads(request.data)
     emit('command',
          post_data,
@@ -33,6 +31,7 @@ def commands(room):
     return json.dumps({'success': True})
 
 
+# For testing
 @socketio.on('my_room_event', namespace=command_namespace)
 def send_room_message(message):
     session['receive_count'] = session.get('receive_count', 0) + 1
@@ -43,12 +42,11 @@ def send_room_message(message):
 
 @socketio.on('connect', namespace=command_namespace)
 def connect():
-    emit('command', {'data': 'Connected', 'count': 0})
+    emit('command', {'data': 'Connected'})
 
 
 @socketio.on('join', namespace=command_namespace)
 def join(message):
     join_room(message['room'])
     emit('command',
-         {'data': 'In rooms: ' + ', '.join(rooms()),
-          'count': 'test'})
+         {'room': rooms})
