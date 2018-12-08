@@ -1,7 +1,7 @@
 # AutoGarden Server Application
 This repo holds the code for the heroku server to send commands through a `POST` request and send that data to device with Socket.io
 
-Example request to `/api/send/$room` :
+Example request to `/api/send/$device` :
 
 ```
 {
